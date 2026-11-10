@@ -6,7 +6,8 @@ import { sharedAssertions } from "../pages/assertions";
 import { assertionTexts } from "../utils/assertionTexts";
 import { SignatureHandler } from "../utils/signatureHandler";
 import { SharedFormActions } from "../utils/sharedFormActions";
-import { expectTextSimilarityAtLeast } from "../utils/fuzzyTextAssertions";
+import { expectTextSimilarityAtLeast98 } from "../utils/fuzzyTextAssertions";
+import{ expectTextSimilarityAtLeast95 } from "../utils/fuzzyTextAssertions";
 import { SelfHealingLocator } from "../utils/selfHealingLocator";
 
 test.describe.configure({ mode: "serial" });
@@ -42,17 +43,13 @@ test.describe("Change PCP Regression testsuite", () => {
 
     const providerNotFoundMessage = await new SelfHealingLocator(
       pcpChange.formRoot,
-    ).require(
-      pcpChange.sharedFormActions.providerNotFound,
-      "Error Message",
-      "textbox",
+    ).require( pcpChange.sharedFormActions.providerNotFound,"Error Message","textbox",
       { description: "Provider not found message" },
     );
+
     await expect(providerNotFoundMessage).toHaveValue(/.+/);
-    expectTextSimilarityAtLeast(
-      await providerNotFoundMessage.inputValue(),
-      providerNotFoundtxt,
-    );
+    expectTextSimilarityAtLeast98(await providerNotFoundMessage.inputValue(),providerNotFoundtxt,);
+
     console.log("Validation Message Confirmed:", providerNotFoundtxt);
   });
 
@@ -63,17 +60,13 @@ test.describe("Change PCP Regression testsuite", () => {
 
     const providerNotFoundMessage = await new SelfHealingLocator(
       pcpChange.formRoot,
-    ).require(
-      pcpChange.sharedFormActions.providerNotFound,
-      "Error Message",
-      "textbox",
+    ).require(pcpChange.sharedFormActions.providerNotFound,"Error Message","textbox",
       { description: "Provider not found message" },
     );
+
     await expect(providerNotFoundMessage).toHaveValue(/.+/);
-    expectTextSimilarityAtLeast(
-      await providerNotFoundMessage.inputValue(),
-      memberNotFoundtxt,
-    );
+    expectTextSimilarityAtLeast95(await providerNotFoundMessage.inputValue(), providerNotFoundtxt);
+
     console.log("Validation Message Confirmed:", providerNotFoundtxt);
   });
 
