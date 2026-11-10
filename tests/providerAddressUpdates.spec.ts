@@ -1,27 +1,31 @@
-import { test, type Locator } from '@playwright/test';
+import { expect, test, type Locator } from "@playwright/test";
 
-import { ProviderAddressUpdates } from '../pages/providerAddressUpdates';
-import testData from '../testdata/testdata.json';
-import { sharedAssertions } from '../pages/assertions';
-import { assertionTexts } from '../utils/assertionTexts';
-import { SignatureHandler } from '../utils/signatureHandler';
+import { ProviderAddressUpdates } from "../pages/providerAddressUpdates";
+import testData from "../testdata/testdata.json";
+import { sharedAssertions } from "../pages/assertions";
+import { assertionTexts } from "../utils/assertionTexts";
+import { SignatureHandler } from "../utils/signatureHandler";
+import { SelfHealingLocator } from "../utils/selfHealingLocator";
+import { expectTextSimilarityAtLeast98 } from "../utils/fuzzyTextAssertions";
 
-test.describe.configure({ mode: 'serial' });
+test.describe.configure({ mode: "serial" });
 
-test.describe('Provider Address Updates Regression testsuite', () => {
-  const envTarget = 'qa';
-  const providerNotFoundText = assertionTexts.global.validationErrors.providerNotFound;
-  const memberNotFoundText = assertionTexts.global.validationErrors.memberNotFound;
+test.describe("Provider Address Updates Regression testsuite", () => {
+  const envTarget = "qa";
+  const providerNotFoundTxt =
+    assertionTexts.global.validationErrors.providerNotFound;
+  const memberNotFoundTxt =
+    assertionTexts.global.validationErrors.memberNotFound;
 
   let addressUpdates: ProviderAddressUpdates;
   let signatureHandler: SignatureHandler;
-  let formAssert: sharedAssertions<ProviderAddressUpdates['sharedFormActions']>;
+  let formAssert: sharedAssertions<ProviderAddressUpdates["sharedFormActions"]>;
   let providerNotFoundLabel: Locator;
   let memberNotFoundLabel: Locator;
 
   test.beforeEach(async ({ page }, info) => {
     addressUpdates = new ProviderAddressUpdates(page);
-    signatureHandler = new SignatureHandler(page)
+    signatureHandler = new SignatureHandler(page);
     formAssert = new sharedAssertions(page, addressUpdates.sharedFormActions);
     providerNotFoundLabel = addressUpdates.sharedFormActions.providerNotFound;
     memberNotFoundLabel = addressUpdates.sharedFormActions.memberNotFound;
@@ -35,18 +39,34 @@ test.describe('Provider Address Updates Regression testsuite', () => {
     console.log(` Finished test: ${info.title}\n`);
   });
 
-  test('Successfully Submit a Provider Address Updates form.', async ({ page }) => {
-  await formAssert.ui.toHaveHeader(assertionTexts.pages.addressUpdates.header);
+  test("Successfully Submit a Provider Address Updates form.", async ({
+    page,
+  }) => {
+    await formAssert.ui.toHaveHeader(
+      assertionTexts.pages.addressUpdates.header,
+    );
 
-              const todaysDate = new Date().toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                      console.log( ' date ' + todaysDate);
-
+    const todaysDate = new Date().toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    console.log(" date " + todaysDate);
 
     await addressUpdates.fillProviderSection(testData.Data.AddressUpdatesData);
 
-   // await signatureHandler.signForm();
-   // await addressUpdates.clickSubmitBtn();
-  });
-  
+        const providerNotFoundMessage = await new SelfHealingLocator(
+          addressUpdates.formRoot,
+        ).require(addressUpdates.sharedFormActions.providerNotFound,"Error Message","textbox",
+          { description: "Provider not found message" },
+        );
+        
+        await expect(providerNotFoundMessage).toHaveValue(/.+/);
+        expectTextSimilarityAtLeast98(await providerNotFoundMessage.inputValue(), providerNotFoundTxt);
+    
+        console.log("Validation Message Confirmed:", providerNotFoundTxt);
+      });
 
-});
+    // await signatureHandler.signForm();
+    // await addressUpdates.clickSubmitBtn();
+  });

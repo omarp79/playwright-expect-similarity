@@ -58,10 +58,33 @@ export function calculateTextSimilarity(
   );
 }
 
-export function expectTextSimilarityAtLeast(
+export function expectTextSimilarityAtLeast98(
   actual: string,
   expected: string,
   minimumPercent = 98,
+): void {
+  if (
+    !Number.isFinite(minimumPercent) ||
+    minimumPercent < 0 ||
+    minimumPercent > 100
+  ) {
+    throw new RangeError(
+      `Minimum similarity must be a finite percentage from 0 to 100; received ${minimumPercent}.`,
+    );
+  }
+
+  const similarity = calculateTextSimilarity(actual, expected);
+
+  expect(
+    similarity,
+    `Expected text to be at least ${minimumPercent}% similar; ` +
+      `actual similarity was ${similarity.toFixed(2)}%.`,
+  ).toBeGreaterThanOrEqual(minimumPercent);
+}
+export function expectTextSimilarityAtLeast95(
+  actual: string,
+  expected: string,
+  minimumPercent = 95,
 ): void {
   if (
     !Number.isFinite(minimumPercent) ||
